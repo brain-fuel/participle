@@ -61,13 +61,20 @@ func parseAssignments(input string) ([]Assignment, *Failure) {
 		if offset == len(input) || input[offset] < '0' || input[offset] > '9' {
 			return nil, failureAt(ExpectedInteger{}, input, offset, lineStart, line, "Integer")
 		}
+		base := uint64(10)
+		if input[offset] == '0' && offset+1 < len(input) && input[offset+1] >= '0' && input[offset+1] <= '9' {
+			base = 8
+		}
 		var value uint64
 		for offset < len(input) && input[offset] >= '0' && input[offset] <= '9' {
 			digit := uint64(input[offset] - '0')
-			if value > (uint64(1<<63)-1+boolUint(negative)-digit)/10 {
+			if digit >= base {
+				return nil, failureAt(ExpectedInteger{}, input, offset, lineStart, line, "base-8 integer")
+			}
+			if value > (uint64(1<<63)-1+boolUint(negative)-digit)/base {
 				return nil, failureAt(IntegerOverflow{}, input, valueStart, lineStart, line, "int64")
 			}
-			value = value*10 + digit
+			value = value*base + digit
 			offset++
 		}
 		signed := int64(value)

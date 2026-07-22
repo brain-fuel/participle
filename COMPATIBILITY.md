@@ -9,6 +9,8 @@ assignments, optional semicolons, whitespace, exact values, and acceptance vs.
 rejection. GoForge additionally accepts newline-separated assignments and
 returns immutable three-token source spans. It reports explicit identifier,
 equals, integer, overflow, unexpected-byte, and FIRST-set failures.
+Integer capture follows upstream's Go base-zero behavior, including octal
+leading-zero forms such as `0010`.
 
 Not yet compatible: struct-tag grammar compilation, custom mapper/capture
 hooks, arbitrary lexer definitions, EBNF rendering, elision, union types, and

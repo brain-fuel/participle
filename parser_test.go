@@ -2,6 +2,7 @@ package participle
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -83,6 +84,13 @@ func TestMinInt64AndDiagnostics(t *testing.T) {
 	}
 }
 
+func TestUpstreamBaseZeroIntegerSemantics(t *testing.T) {
+	values := unwrap(t, Parse(checkedParser(), "octal=0010; negative=-0010"))
+	if values[0].Value != 8 || values[1].Value != -8 {
+		t.Fatalf("values=%#v", values)
+	}
+}
+
 func TestErasedEvidenceGuards(t *testing.T) {
 	grammar := AssignmentGrammar(1)
 	otherGrammar := AssignmentGrammar(2)
@@ -112,6 +120,37 @@ func TestDynamicGrammarBinding(t *testing.T) {
 	values := unwrap(t, Parse(BuildAssignments(grammar, AssignmentFirst(grammar)), "dynamic=9"))
 	if len(values) != 1 || values[0].Name != "dynamic" {
 		t.Fatalf("values=%#v", values)
+	}
+}
+
+func TestParserLaws(t *testing.T) {
+	parser := checkedParser()
+	input := "alpha=1; beta=-2; gamma=3"
+	first := Parse(parser, input)
+	second := Parse(parser, input)
+	if !reflect.DeepEqual(first, second) {
+		t.Fatal("determinism law failed")
+	}
+
+	semicolon := unwrap(t, first)
+	newline := unwrap(t, Parse(parser, "alpha=1\nbeta=-2\ngamma=3"))
+	if len(semicolon) != len(newline) {
+		t.Fatal("separator law changed result length")
+	}
+	for i := range semicolon {
+		if semicolon[i].Name != newline[i].Name || semicolon[i].Value != newline[i].Value {
+			t.Fatalf("separator law failed at %d", i)
+		}
+		start, end := SpanStart(semicolon[i].Span), SpanEnd(semicolon[i].Span)
+		if start < 0 || end > len(input) || start >= end || !strings.HasPrefix(input[start:end], semicolon[i].Name) {
+			t.Fatalf("span law failed for %#v", semicolon[i])
+		}
+	}
+
+	dynamic := BindAssignments(17, LoadAssignments(17))
+	dynamicResult := Parse(BuildAssignments(dynamic, AssignmentFirst(dynamic)), input)
+	if !reflect.DeepEqual(first, dynamicResult) {
+		t.Fatal("dynamic/static binding law failed")
 	}
 }
 
