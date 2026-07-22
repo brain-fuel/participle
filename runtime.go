@@ -1,0 +1,135 @@
+package participle
+
+import "strconv"
+
+func failureMessage(failure *Failure) string {
+	message := strconv.Itoa(failure.Line) + ":" + strconv.Itoa(failure.Column) + ": " + failureKindText(failure.Kind)
+	if failure.Unexpected != "" {
+		message += ", got " + failure.Unexpected
+	}
+	return message
+}
+
+func failureKindText(kind FailureKind) string {
+	switch kind.(type) {
+	case UnexpectedByte:
+		return "unexpected byte"
+	case ExpectedIdentifier:
+		return "expected identifier"
+	case ExpectedEquals:
+		return "expected '='"
+	case ExpectedInteger:
+		return "expected integer"
+	case IntegerOverflow:
+		return "integer overflow"
+	case AmbiguousFirstSet:
+		return "ambiguous FIRST set"
+	default:
+		return "parse failure"
+	}
+}
+
+func parseAssignments(input string) ([]Assignment, *Failure) {
+	assignments := make([]Assignment, 0, 8)
+	offset, lineStart, line := 0, 0, 1
+	for {
+		offset, lineStart, line = skipSpace(input, offset, lineStart, line)
+		if offset == len(input) {
+			return assignments, nil
+		}
+		start := offset
+		if !identifierStart(input[offset]) {
+			return nil, failureAt(ExpectedIdentifier{}, input, offset, lineStart, line, "Identifier")
+		}
+		offset++
+		for offset < len(input) && identifierContinue(input[offset]) {
+			offset++
+		}
+		name := input[start:offset]
+		offset, lineStart, line = skipHorizontal(input, offset, lineStart, line)
+		if offset == len(input) || input[offset] != '=' {
+			return nil, failureAt(ExpectedEquals{}, input, offset, lineStart, line, "=")
+		}
+		offset++
+		offset, lineStart, line = skipHorizontal(input, offset, lineStart, line)
+		valueStart := offset
+		negative := false
+		if offset < len(input) && input[offset] == '-' {
+			negative = true
+			offset++
+		}
+		if offset == len(input) || input[offset] < '0' || input[offset] > '9' {
+			return nil, failureAt(ExpectedInteger{}, input, offset, lineStart, line, "Integer")
+		}
+		var value uint64
+		for offset < len(input) && input[offset] >= '0' && input[offset] <= '9' {
+			digit := uint64(input[offset] - '0')
+			if value > (uint64(1<<63)-1+boolUint(negative)-digit)/10 {
+				return nil, failureAt(IntegerOverflow{}, input, valueStart, lineStart, line, "int64")
+			}
+			value = value*10 + digit
+			offset++
+		}
+		signed := int64(value)
+		if negative {
+			if value == uint64(1)<<63 {
+				signed = -1 << 63
+			} else {
+				signed = -signed
+			}
+		}
+		end := offset
+		assignments = append(assignments, Assignment{Name: name, Value: signed, Span: spanValue{start: start, end: end, tokens: 3}})
+		if offset < len(input) && input[offset] != ';' && input[offset] != '\n' && input[offset] != '\r' && input[offset] != ' ' && input[offset] != '\t' {
+			return nil, failureAt(UnexpectedByte{}, input, offset, lineStart, line, "separator")
+		}
+		if offset < len(input) && input[offset] == ';' {
+			offset++
+		}
+	}
+}
+
+func boolUint(value bool) uint64 {
+	if value {
+		return 1
+	}
+	return 0
+}
+
+func failureAt(kind FailureKind, input string, offset, lineStart, line int, expected string) *Failure {
+	unexpected := "EOF"
+	if offset < len(input) {
+		unexpected = strconv.QuoteRune(rune(input[offset]))
+	}
+	return &Failure{Kind: kind, Offset: offset, Line: line, Column: offset - lineStart + 1, Unexpected: unexpected, Expected: []string{expected}}
+}
+
+func skipSpace(input string, offset, lineStart, line int) (int, int, int) {
+	for offset < len(input) {
+		switch input[offset] {
+		case ' ', '\t', '\r', ';':
+			offset++
+		case '\n':
+			offset++
+			line++
+			lineStart = offset
+		default:
+			return offset, lineStart, line
+		}
+	}
+	return offset, lineStart, line
+}
+
+func skipHorizontal(input string, offset, lineStart, line int) (int, int, int) {
+	for offset < len(input) && (input[offset] == ' ' || input[offset] == '\t') {
+		offset++
+	}
+	return offset, lineStart, line
+}
+
+func identifierStart(value byte) bool {
+	return value == '_' || value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z'
+}
+func identifierContinue(value byte) bool {
+	return identifierStart(value) || value >= '0' && value <= '9'
+}
