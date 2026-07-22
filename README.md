@@ -42,3 +42,11 @@ with `dependent index mismatch`.
 
 The parser currently targets the surface in [COMPATIBILITY.md](COMPATIBILITY.md);
 it is not presented as a drop-in replacement for Participle's complete API.
+
+## Independent consumer
+
+Agile Frontier v0.2 uses this package inside its Go+/WASM planning engine to
+parse compact capacity overrides. That separate module exercises inferred
+grammar identity, FIRST evidence, exhaustive outcomes, generated-Go interop,
+and the browser WASM boundary rather than treating the parser as an isolated
+example.
