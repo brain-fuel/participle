@@ -379,7 +379,7 @@ type Failure struct {
 	Expected   []string
 }
 
-func (failure Failure) Error() string { return failureMessage(&failure) }
+func (failure Failure) Error() string { return failureMessage(failure) }
 
 //goplus:enum Outcome[T any]
 type Outcome[T any] interface{ isOutcome(T) }

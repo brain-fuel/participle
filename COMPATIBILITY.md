@@ -14,8 +14,13 @@ leading-zero forms such as `0010`.
 
 Not yet compatible: struct-tag grammar compilation, custom mapper/capture
 hooks, arbitrary lexer definitions, EBNF rendering, elision, union types, and
-Participle's full error API. These stay outside v0.1 rather than being claimed
+Participle's full error API. These stay outside v0.2 rather than being claimed
 as compatible.
+
+Version 0.2 adds a Java 25 output target for this same documented semantic
+surface. The Java artifact is generated from this package's Go+ enums, indexed
+grammar structures, and parser implementation, with Java-specific conformance
+tests for successful and rejected parses.
 
 The generated parser is tied to the assignment grammar AST and its FIRST-set
 witness. Lookahead and commit are explicit nodes rather than implicit control

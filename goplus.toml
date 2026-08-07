@@ -1,0 +1,36 @@
+schema_version = 1
+default_targets = ["go"]
+
+[targets.go]
+
+[targets.java]
+release = 25
+kind = "library"
+source_dir = "gen/java"
+class_dir = ".goplus/build/java/classes"
+jar = "dist/participle-0.2.0.jar"
+runtime_jar = ".goplus/build/java/goplus-runtime-abi1.jar"
+package_prefix = "dev.goforge.participle"
+module_name = "dev.goforge.participle"
+classpath_files = []
+modulepath_files = []
+bundle = true
+strong_module = false
+
+[targets.java.maven]
+group_id = "dev.goforge"
+artifact_id = "participle"
+version = "0.2.0"
+name = "GoForge Participle"
+description = "A grammar-indexed parser authored in Go+ for Go and Java 25+."
+url = "https://goforge.dev/participle/"
+license_name = "MIT License"
+license_url = "https://opensource.org/license/mit"
+developer_id = "brain-fuel"
+developer_name = "brain-fuel"
+developer_email = "opensource@goforge.dev"
+developer_url = "https://github.com/brain-fuel"
+scm_url = "https://github.com/brain-fuel/participle"
+scm_connection = "scm:git:https://github.com/brain-fuel/participle.git"
+scm_developer_connection = "scm:git:ssh://git@github.com/brain-fuel/participle.git"
+bundle = "dist/central/participle-0.2.0-bundle.zip"

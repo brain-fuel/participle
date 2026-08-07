@@ -74,7 +74,7 @@ type Failure struct {
 	Expected []string
 }
 
-func (failure Failure) Error() string { return failureMessage(&failure) }
+func (failure Failure) Error() string { return failureMessage(failure) }
 
 type Outcome[T any] enum {
 	Parsed(Value T)
