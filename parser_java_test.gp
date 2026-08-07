@@ -23,5 +23,6 @@ func TestJavaFailurePosition(t *testing.T) {
 	case Parsed(_): t.Fatal("invalid integer parsed")
 	case Rejected(failure):
 		if failure.Line != 1 || failure.Column != 9 { t.Fatal("wrong failure position") }
+		if failure.Unexpected != "'n'" { t.Fatal("wrong quoted unexpected input") }
 	}
 }

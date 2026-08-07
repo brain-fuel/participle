@@ -30,8 +30,8 @@ conventional generic API and retains runtime identity guards at Go boundaries.
 
 ## Java 25 and Maven
 
-Version 0.2 adds a Java 25 library target generated from the same Go+ semantic
-source. Build and test it with Go+ v0.142.0 or newer:
+Version 0.3 emits both the Go package and Java 25 library from one semantic
+source set. Build and test it with Go+ v0.142.4 or newer:
 
 ```sh
 goplus build --target java ./...
@@ -40,10 +40,14 @@ goplus test --target java ./...
 
 The resulting Java module and JAR are both named `dev.goforge.participle`.
 After its first Maven Central publication, Java projects can depend on
-`dev.goforge:participle:0.2.0`. The Central release includes the binary,
+`dev.goforge:participle:0.3.0`. The Central release includes the binary,
 generated sources, documentation, POM, checksums, and OpenPGP signatures.
 The standalone consumer under `testdata/java-consumer` is compiled against only
 that finished JAR during release verification.
+
+`runtime.gp` owns parsing and diagnostic semantics for both targets. There is
+no Java-specific library implementation; target-specific files are limited to
+generated artifacts and integration harnesses.
 
 ## Verification
 

@@ -6,10 +6,10 @@ the timed loop. Five runs were recorded with `-benchmem`.
 
 | implementation | ns/op range | B/op | allocs/op |
 |---|---:|---:|---:|
-| GoForge | 5,995–6,294 | 30,104 | 263 |
-| upstream | 236,777–245,486 | 683,760–683,762 | 8,237 |
+| GoForge | 5,523–5,556 | 30,104 | 263 |
+| upstream | 218,693–219,709 | 683,758–683,759 | 8,237 |
 
-Using the least favorable endpoints, GoForge is 37.6× faster and uses 95.6%
+Using the least favorable endpoints, GoForge is 39.3× faster and uses 95.6%
 fewer bytes plus 96.8% fewer allocations. This exceeds the release gates of 2×
 throughput and 50% fewer allocations with substantial margin.
 

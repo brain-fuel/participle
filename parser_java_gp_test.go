@@ -42,5 +42,8 @@ func TestJavaFailurePosition(t *testing.T) {
 		if failure.Line != 1 || failure.Column != 9 {
 			t.Fatal("wrong failure position")
 		}
+		if failure.Unexpected != "'n'" {
+			t.Fatal("wrong quoted unexpected input")
+		}
 	}
 }
